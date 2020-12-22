@@ -9,7 +9,6 @@ app.get('/databases/:name', async (req, res) => {
     res.status(200).send(data);
 });
 
-
 app.use(express.static('build'));
 
 app.get('/*', (req, res) => {
