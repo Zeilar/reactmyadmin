@@ -5,7 +5,8 @@ import classnames from 'classnames';
 export default function TableCell({ children, className, ...props }) {
     const styles = createUseStyles({
         cell: {
-            wordBreak: 'break-all',
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
             maxWidth: '20rem',
             padding: 10,
         },

@@ -19,7 +19,7 @@ export default function Database() {
             textAlign: 'left',
             cursor: 'pointer',
             marginBottom: 2,
-            padding: 20,
+            padding: 15,
             border: 0,
             '&.active': {
                 backgroundColor: 'var(--color-primary-dark)',
@@ -66,9 +66,8 @@ export default function Database() {
         let columns = [];
         for (const property in table.columns) {
             columns.push(
-                <TableHeader key={property}>
-                    {table.columns[property].primaryKey && <Icon title="Primary key" style={{ marginRight: 5 }} path={mdiKeyVariant} />}
-                    <span>{property}</span>
+                <TableHeader key={property} title={table.columns[property].primaryKey ? 'Primary key' : null}>
+                    {property}
                 </TableHeader>
             );
         }
@@ -83,7 +82,7 @@ export default function Database() {
                     {
                         cells.map(cell => (
                             <TableCell key={cell}>
-                                {cell}
+                                {cell?.length >= 150 ? `${cell.substring(0, 150)} ...` : cell}
                             </TableCell>
                         ))
                     }

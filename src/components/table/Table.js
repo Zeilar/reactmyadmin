@@ -5,7 +5,7 @@ import React from 'react';
 export default function Table({ children, className, ...props }) {
     const styles = createUseStyles({
         table: {
-            minWidth: '75vw',
+            width: '80vw',
         },
     });
     const classes = styles();
