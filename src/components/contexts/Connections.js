@@ -1,24 +1,16 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { Http } from '../../classes';
 
 export const ConnectionsContext = createContext();
 
 export function ConnectionsContextProvider({ children }) {
-    const [loadingConnections, setLoadingConnections] = useState(false);
-    const [connections, setConnections] = useState([]);
-
-    async function getConnections() {
-        setLoadingConnections(true);
-        setLoadingConnections(false);
-        // setConnections(data);
-    }
+    const [connections, setConnections] = useState(JSON.parse(localStorage.getItem('connections')) ?? []);
 
     useEffect(() => {
-        getConnections();
-    }, []);
+        localStorage.setItem('connections', JSON.stringify(connections));
+    }, [connections]);
 
     return (
-        <ConnectionsContext.Provider value={{ connections, setConnections, loadingConnections, setLoadingConnections }}>
+        <ConnectionsContext.Provider value={{ connections, setConnections }}>
             {children}
         </ConnectionsContext.Provider>
     );

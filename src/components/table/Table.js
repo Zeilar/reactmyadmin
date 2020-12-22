@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from 'react';
 import { createUseStyles } from 'react-jss';
 import classnames from 'classnames';
+import React from 'react';
 
-export default function Table({ children }) {
+export default function Table({ children, className, ...props }) {
+    const styles = createUseStyles({
+        table: {
+            minWidth: '75vw',
+        },
+    });
+    const classes = styles();
+
     return (
-        <table>
+        <table className={classnames(classes.table, className)} {...props}>
             {children}
         </table>
     );

@@ -2,10 +2,10 @@ import { createUseStyles } from 'react-jss';
 import classnames from 'classnames';
 import React from 'react';
 
-export default function TableHead({ children }) {
+export default function TableHead({ children, className, ...props }) {
     const styles = createUseStyles({
         thead: {
-            backgroundColor: 'rgb(26, 64, 74)',
+            backgroundColor: 'var(--color-primary-dark)',
             color: 'var(--color-primary)',
             fontSize: '1.25rem',
             textAlign: 'left',
@@ -14,7 +14,7 @@ export default function TableHead({ children }) {
     const classes = styles();
 
     return (
-        <thead className={classnames(classes.thead)}>
+        <thead className={classnames(classes.thead, className)} {...props}>
             {children}
         </thead>
     );
