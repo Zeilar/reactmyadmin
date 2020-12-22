@@ -81,7 +81,7 @@ export default function Database() {
                 <TableRow key={Math.random()}>
                     {
                         cells.map(cell => (
-                            <TableCell key={cell}>
+                            <TableCell title={cell?.length >= 150 ? cell : null} key={cell}>
                                 {cell?.length >= 150 ? `${cell.substring(0, 150)} ...` : cell}
                             </TableCell>
                         ))
