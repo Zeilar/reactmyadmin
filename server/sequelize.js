@@ -32,16 +32,17 @@ async function getDatabase() {
     return await Promise.all(
         tables.map(async table => {
         const columns = await getColumns(table);
-        const rows = await getRows(table);
         return {
             columns: columns,
             table: table,
-            rows: rows,
         };
     }));
 }
 
 module.exports = {
     getDatabase,
+    getColumns,
+    getTables,
+    getRows,
     connect,
 };

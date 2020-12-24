@@ -1,9 +1,9 @@
 import { Table, TableHead, TableHeader, TableBody, TableRow, TableCell } from './table';
 import { Container, PrimaryTitle, Row, Col } from './styled-components';
-import { mdiDatabase, mdiLoading, mdiKeyVariant } from '@mdi/js';
 import React, { useState, useEffect, useContext } from 'react';
+import { NavLink, useParams } from 'react-router-dom';
+import { mdiDatabase, mdiLoading } from '@mdi/js';
 import { ConnectionsContext } from './contexts';
-import { useParams } from 'react-router-dom';
 import { createUseStyles } from 'react-jss';
 import classnames from 'classnames';
 import { Http } from '../classes';
@@ -16,11 +16,16 @@ export default function Database() {
         },
         tableLink: {
             backgroundColor: 'var(--table-primary)',
+            textDecoration: 'none',
+            fontSize: '1.25rem',
             textAlign: 'left',
             cursor: 'pointer',
             marginBottom: 2,
             padding: 15,
             border: 0,
+            '&:hover': {
+                backgroundColor: 'var(--table-secondary)',
+            },
             '&.active': {
                 backgroundColor: 'var(--color-primary-dark)',
                 color: 'var(--color-primary)',
@@ -33,46 +38,65 @@ export default function Database() {
     });
     const classes = styles();
 
-    const { connections } = useContext(ConnectionsContext);
-    const { name } = useParams();
+    const { setConnections } = useContext(ConnectionsContext);
+    const { name, activeTable, page } = useParams();
 
-    const [activeTable, setActiveTable] = useState(connections.find(connection => connection?.database === name)?.activeTable);
-    const [loadingDatabase, setLoadingDatabase] = useState(true);
+    const [columns, setColumns] = useState([]);
     const [tables, setTables] = useState([]);
+    const [rows, setRows] = useState([]);
+
+    const [loadingDatabase, setLoadingDatabase] = useState(true);
     const [error, setError] = useState();
 
     useEffect(() => {
-        async function getDatabase() {
+        async function getTables() {
             setLoadingDatabase(true);
-            const { code, data } = await Http.get('/databases/tph');
+            const { code, data } = await Http.get(`/databases/${name}`);
             setLoadingDatabase(false);
             setTables(data);
             if (code < 200 || code >= 300) {
                 setError('Something went wrong loading the database');
             }
         }
-        getDatabase();
-    }, []);
-    
-    const getTableData = () => tables.find(data => data.table === activeTable) ?? { columns: {}, rows: [] };
+        getTables();
+    }, [name]);
 
+    useEffect(() => {
+        async function getRows() {
+            const { code, data } = await Http.get(`/databases/${name}/${activeTable}`);
+            setRows(data);
+            if (code < 200 || code >= 300) {
+                setError('Something went wrong loading the table rows');
+            }
+        }
+        async function getColumns() {
+            const { code, data } = await Http.get(`/databases/${name}/${activeTable}/columns`);
+            setColumns(data);
+            if (code < 200 || code >= 300) {
+                setError('Something went wrong loading the table columns');
+            }
+        }
+        if (activeTable) {
+            getColumns();
+            getRows();
+        }
+    }, [name, activeTable]);
+    
     function renderTable() {
-        if (!tables.length || !activeTable) {
-            return null;
+        if (!columns || !activeTable) {
+            return;
         }
 
-        const table = getTableData();
-
-        let columns = [];
-        for (const property in table.columns) {
-            columns.push(
-                <TableHeader key={property} title={table.columns[property].primaryKey ? 'Primary key' : null}>
+        let columnsJsx = [];
+        for (const property in columns) {
+            columnsJsx.push(
+                <TableHeader key={property} title={columns[property].primaryKey ? 'Primary key' : null}>
                     {property}
                 </TableHeader>
             );
         }
 
-        const rows = table.rows.map(row => {
+        const rowsJsx = rows.map(row => {
             let cells = [];
             for (const property in row) {
                 cells.push(row[property]);
@@ -90,13 +114,15 @@ export default function Database() {
             );
         });
 
+        console.log(rowsJsx);
+
         return (
             <>
                 <TableHead>
-                    {columns}
+                    {columnsJsx}
                 </TableHead>
                 <TableBody>
-                    {rows}
+                    {rowsJsx}
                 </TableBody>
             </>
         );
@@ -104,29 +130,31 @@ export default function Database() {
 
     return (
         <Container>
-            <PrimaryTitle>
-                <Icon path={mdiDatabase} />
-                <span>{name}</span>
-            </PrimaryTitle>
             {
                 loadingDatabase
                     ? <Icon className="loading" path={mdiLoading} spin={1} size={2} />
-                    : <Row style={{ overflowX: 'auto', maxWidth: 'calc(100vw - var(--container-margin))' }}>
-                        <Col className={classnames(classes.tableLinks)} as="ul">
-                            {
-                                tables.map(({ table }) => (
-                                    <li
-                                        className={classnames(classes.tableLink, { active: table === activeTable })}
-                                        onClick={() => setActiveTable(table)}
-                                        key={table}
-                                    >
-                                        {table}
-                                    </li>
-                                ))
-                            }
-                        </Col>
-                        <Table>{renderTable()}</Table>
-                    </Row>
+                    : <>
+                        <PrimaryTitle>
+                            <Icon path={mdiDatabase} />
+                            <span>{name}</span>
+                        </PrimaryTitle>
+                        <Row style={{ overflowX: 'auto', maxWidth: 'calc(100vw - var(--container-margin))' }}>
+                            <Col className={classnames(classes.tableLinks)} as="ul">
+                                {
+                                    tables.map(({ table }) => (
+                                        <NavLink
+                                            className={classnames(classes.tableLink)}
+                                            to={`/database/${name}/${table}`}
+                                            key={table}
+                                        >
+                                            {table}
+                                        </NavLink>
+                                    ))
+                                }
+                            </Col>
+                            <Table>{renderTable()}</Table>
+                        </Row>
+                    </>
             }
             {!loadingDatabase && !tables.length && <p className="errorText">The database is completely empty</p>}
             {error && <p className="errorText">{error}</p>}

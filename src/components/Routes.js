@@ -8,7 +8,7 @@ export default function Routes() {
     return (
         <Router>
             <Switch>
-                    <Route path="/database/:name?" exact>
+                    <Route path="/database/:name/:activeTable?/:page?" exact>
                         <Database />
                     </Route>
                     <Route>

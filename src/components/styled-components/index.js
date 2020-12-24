@@ -25,14 +25,9 @@ const ButtonOutline = styled.button`
     cursor: pointer;
     padding: 15px;
     outline: 0;
-    &:focus, &:hover {
-        color: white;
-    }
-    &:focus {
-        border-color: white;
-    }
     &:hover {
         background-color: rgba(0, 0, 0, 0.35);
+        color: white;
     }
 `;
 
