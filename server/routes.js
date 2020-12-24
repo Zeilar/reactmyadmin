@@ -6,10 +6,11 @@ const app = express();
 app.get('/databases/:name/:table/columns', async (req, res) => {
     await connect(req.params.name);
     const data = await getColumns(req.params.table);
+    console.log('COLUMNS: ', data);
     res.status(200).send(data);
 });
 
-app.get('/databases/:name/:table', async (req, res) => {
+app.get('/databases/:name/:table/:page?', async (req, res) => {
     await connect(req.params.name);
     const data = await getRows(req.params.table);
     res.status(200).send(data);

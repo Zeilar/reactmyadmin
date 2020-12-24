@@ -83,12 +83,13 @@ export default function Database() {
     }, [name, activeTable]);
     
     function renderTable() {
-        if (!columns || !activeTable) {
+        if (!activeTable) {
             return;
         }
 
         let columnsJsx = [];
         for (const property in columns) {
+            console.log(property, columns);
             columnsJsx.push(
                 <TableHeader key={property} title={columns[property].primaryKey ? 'Primary key' : null}>
                     {property}
@@ -113,8 +114,6 @@ export default function Database() {
                 </TableRow>
             );
         });
-
-        console.log(rowsJsx);
 
         return (
             <>
