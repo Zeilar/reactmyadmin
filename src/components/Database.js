@@ -5,6 +5,7 @@ import { NavLink, useParams } from 'react-router-dom';
 import { mdiDatabase, mdiLoading } from '@mdi/js';
 import { ConnectionsContext } from './contexts';
 import { createUseStyles } from 'react-jss';
+import Loading from './misc/Loading';
 import classnames from 'classnames';
 import { Http } from '../classes';
 import Icon from '@mdi/react';
@@ -35,6 +36,15 @@ export default function Database() {
                 marginBottom: 0,
             },
         },
+        rows: {
+            maxWidth: 'calc(100vw - var(--container-margin))',
+            position: 'relative',
+            overflowX: 'auto',
+        },
+        tableWrapper: {
+            position: 'relative',
+            width: '80vw',
+        },
     });
     const classes = styles();
 
@@ -46,6 +56,7 @@ export default function Database() {
     const [rows, setRows] = useState([]);
 
     const [loadingDatabase, setLoadingDatabase] = useState(true);
+    const [loadingRows, setLoadingRows] = useState(true);
     const [error, setError] = useState();
 
     useEffect(() => {
@@ -62,24 +73,26 @@ export default function Database() {
     }, [name]);
 
     useEffect(() => {
-        async function getRows() {
-            const { code, data } = await Http.get(`/databases/${name}/${activeTable}`);
-            setRows(data);
-            if (code < 200 || code >= 300) {
-                setError('Something went wrong loading the table rows');
+        (async function() {
+            setLoadingRows(true);
+            async function getRows() {
+                const { code, data } = await Http.get(`/databases/${name}/${activeTable}`);
+                setRows(data);
+                if (code < 200 || code >= 300) {
+                    setError('Something went wrong loading the table rows');
+                }
             }
-        }
-        async function getColumns() {
-            const { code, data } = await Http.get(`/databases/${name}/${activeTable}/columns`);
-            setColumns(data);
-            if (code < 200 || code >= 300) {
-                setError('Something went wrong loading the table columns');
+            async function getColumns() {
+                const { code, data } = await Http.get(`/databases/${name}/${activeTable}/columns`);
+                setColumns(data);
+                if (code < 200 || code >= 300) {
+                    setError('Something went wrong loading the table columns');
+                }
             }
-        }
-        if (activeTable) {
-            getColumns();
-            getRows();
-        }
+            await getColumns();
+            await getRows();
+            setLoadingRows(false);
+        })();
     }, [name, activeTable]);
     
     function renderTable() {
@@ -130,13 +143,13 @@ export default function Database() {
         <Container>
             {
                 loadingDatabase
-                    ? <Icon className="loading" path={mdiLoading} spin={1} size={2} />
+                    ? <Loading />
                     : <>
                         <PrimaryTitle>
                             <Icon path={mdiDatabase} />
                             <span>{name}</span>
                         </PrimaryTitle>
-                        <Row style={{ overflowX: 'auto', maxWidth: 'calc(100vw - var(--container-margin))' }}>
+                        <Row className={classnames(classes.rows)}>
                             <Col className={classnames(classes.tableLinks)} as="ul">
                                 {
                                     tables.map(({ table }) => (
@@ -150,7 +163,13 @@ export default function Database() {
                                     ))
                                 }
                             </Col>
-                            <Table>{renderTable()}</Table>
+                            <div className={classnames(classes.tableWrapper)}>
+                                {
+                                    loadingRows
+                                        ? <Loading className="center" />
+                                        : <Table>{renderTable()}</Table>
+                                }
+                            </div>
                         </Row>
                     </>
             }

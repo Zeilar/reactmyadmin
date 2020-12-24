@@ -5,6 +5,7 @@ import React from 'react';
 export default function Table({ children, className, ...props }) {
     const styles = createUseStyles({
         table: {
+            position: 'relative',
             width: '80vw',
         },
     });
