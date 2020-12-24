@@ -89,7 +89,6 @@ export default function Database() {
 
         let columnsJsx = [];
         for (const property in columns) {
-            console.log(property, columns);
             columnsJsx.push(
                 <TableHeader key={property} title={columns[property].primaryKey ? 'Primary key' : null}>
                     {property}

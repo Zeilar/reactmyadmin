@@ -16,7 +16,7 @@ async function connect(name = '', user = 'root', password = null, driver = 'mysq
 
 async function getTables() {
     const response = await database.showAllSchemas() ?? [];
-    return response.map(table => table.Tables_in_tph);
+    return response.map(table => table[Object.keys(table)[0]]);
 }
 
 async function getColumns(table) {
