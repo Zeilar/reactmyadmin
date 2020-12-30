@@ -15,28 +15,48 @@ async function connect(name = '', user = 'root', password = null, driver = 'mysq
 }
 
 async function getTables() {
-    const response = await database.showAllSchemas() ?? [];
-    return response.map(table => table[Object.keys(table)[0]]);
+    try {
+        const response = await database.showAllSchemas() ?? [];
+        return { data: response.map(table => table[Object.keys(table)[0]]) };
+    } catch (error) {
+        console.error(error);
+        return { error: error, data: [] };
+    }
 }
 
 async function getColumns(table) {
-    return await database.getQueryInterface().describeTable(table);
+    try {
+        return { data: await database.getQueryInterface().describeTable(table) };
+    } catch (error) {
+        console.error(error);
+        return { error: error, data: [] };
+    }
 }
 
 async function getRows(table) {
-    return await database.query(`SELECT * FROM ${table}`, { type: database.QueryTypes.SELECT });
+    try {
+        return { data: await database.query(`SELECT * FROM ${table}`, { type: database.QueryTypes.SELECT }) };
+    } catch (error) {
+        console.error(error);
+        return { error: error, data: [] };
+    }
 }
 
 async function getDatabase() {
-    const tables = await getTables();
-    return await Promise.all(
-        tables.map(async table => {
-        const columns = await getColumns(table);
-        return {
-            columns: columns,
-            table: table,
-        };
-    }));
+    try {
+        const tables = await getTables();
+        return { data: await Promise.all(
+            tables.map(async table => {
+                const columns = await getColumns(table);
+                return {
+                    columns: columns,
+                    table: table,
+                };
+            }
+        ))};
+    } catch (error) {
+        return { error: error, data: [ ]};
+    }
 }
 
 module.exports = {

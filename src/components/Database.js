@@ -60,20 +60,21 @@ export default function Database() {
     const [error, setError] = useState();
 
     useEffect(() => {
-        async function getTables() {
+        (async () => {
+        console.log('go');
             setLoadingDatabase(true);
             const { code, data } = await Http.get(`/databases/${name}`);
+            console.log(code, data);
             setLoadingDatabase(false);
             setTables(data);
             if (code < 200 || code >= 300) {
                 setError('Something went wrong loading the database');
             }
-        }
-        getTables();
+        })();
     }, [name]);
 
     useEffect(() => {
-        (async function() {
+        (async () => {
             setLoadingRows(true);
             async function getRows() {
                 const { code, data } = await Http.get(`/databases/${name}/${activeTable}`);
@@ -89,55 +90,11 @@ export default function Database() {
                     setError('Something went wrong loading the table columns');
                 }
             }
-            await getColumns();
-            await getRows();
+            getColumns();
+            getRows();
             setLoadingRows(false);
         })();
     }, [name, activeTable]);
-    
-    function renderTable() {
-        if (!activeTable) {
-            return;
-        }
-
-        let columnsJsx = [];
-        for (const property in columns) {
-            columnsJsx.push(
-                <TableHeader key={property} title={columns[property].primaryKey ? 'Primary key' : null}>
-                    {property}
-                </TableHeader>
-            );
-        }
-
-        const rowsJsx = rows.map(row => {
-            let cells = [];
-            for (const property in row) {
-                cells.push(row[property]);
-            }
-            return (
-                <TableRow key={Math.random()}>
-                    {
-                        cells.map(cell => (
-                            <TableCell title={cell?.length >= 150 ? cell : null} key={cell}>
-                                {cell?.length >= 150 ? `${cell.substring(0, 150)} ...` : cell}
-                            </TableCell>
-                        ))
-                    }
-                </TableRow>
-            );
-        });
-
-        return (
-            <>
-                <TableHead>
-                    {columnsJsx}
-                </TableHead>
-                <TableBody>
-                    {rowsJsx}
-                </TableBody>
-            </>
-        );
-    }
 
     return (
         <Container>
@@ -167,13 +124,13 @@ export default function Database() {
                                 {
                                     loadingRows
                                         ? <Loading className="center" />
-                                        : <Table>{renderTable()}</Table>
+                                        : <Table columns={columns} rows={rows} actions={[]} />
                                 }
                             </div>
                         </Row>
                     </>
             }
-            {!loadingDatabase && !tables.length && <p className="errorText">The database is completely empty</p>}
+            {!loadingDatabase && !tables.length && !error && <p className="errorText">The database is completely empty</p>}
             {error && <p className="errorText">{error}</p>}
         </Container>
     );

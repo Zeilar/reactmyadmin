@@ -5,21 +5,20 @@ const app = express();
 
 app.get('/databases/:name/:table/columns', async (req, res) => {
     await connect(req.params.name);
-    const data = await getColumns(req.params.table);
-    console.log('COLUMNS: ', data);
-    res.status(200).send(data);
+    const { data, error } = await getColumns(req.params.table);
+    res.status(error ? 500 : 200).send(data);
 });
 
 app.get('/databases/:name/:table/:page?', async (req, res) => {
     await connect(req.params.name);
-    const data = await getRows(req.params.table);
-    res.status(200).send(data);
+    const { data, error } = await getRows(req.params.table);
+    res.status(error ? 500 : 200).send(data);
 });
 
 app.get('/databases/:name', async (req, res) => {
-    await connect(req.params.name);
-    const data = await getDatabase();
-    res.status(200).send(data);
+    connect(req.params.name);
+    const { data, error } = await getDatabase();
+    res.status(error ? 500 : 200).send(data);
 });
 
 app.use(express.static('build'));
