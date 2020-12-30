@@ -17,35 +17,35 @@ async function connect(name = '', user = 'root', password = null, driver = 'mysq
 async function getTables() {
     try {
         const response = await database.showAllSchemas() ?? [];
-        return { data: response.map(table => table[Object.keys(table)[0]]) };
+        return response.map(table => table[Object.keys(table)[0]]);
     } catch (error) {
         console.error(error);
-        return { error: error, data: [] };
+        return [];
     }
 }
 
 async function getColumns(table) {
     try {
-        return { data: await database.getQueryInterface().describeTable(table) };
+        return await database.getQueryInterface().describeTable(table);
     } catch (error) {
         console.error(error);
-        return { error: error, data: [] };
+        return [];
     }
 }
 
 async function getRows(table) {
     try {
-        return { data: await database.query(`SELECT * FROM ${table}`, { type: database.QueryTypes.SELECT }) };
+        return await database.query(`SELECT * FROM ${table}`, { type: database.QueryTypes.SELECT });
     } catch (error) {
         console.error(error);
-        return { error: error, data: [] };
+        return [];
     }
 }
 
 async function getDatabase() {
     try {
         const tables = await getTables();
-        return { data: await Promise.all(
+        return await Promise.all(
             tables.map(async table => {
                 const columns = await getColumns(table);
                 return {
@@ -53,9 +53,9 @@ async function getDatabase() {
                     table: table,
                 };
             }
-        ))};
+        ));
     } catch (error) {
-        return { error: error, data: [ ]};
+        return [];
     }
 }
 

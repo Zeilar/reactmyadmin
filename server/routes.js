@@ -4,21 +4,33 @@ const path = require('path');
 const app = express();
 
 app.get('/databases/:name/:table/columns', async (req, res) => {
-    await connect(req.params.name);
-    const { data, error } = await getColumns(req.params.table);
-    res.status(error ? 500 : 200).send(data);
+    try {
+        await connect(req.params.name);
+        const data = await getColumns(req.params.table);
+        res.status(200).send(data);
+    } catch (e) {
+        res.sendStatus(500);
+    }
 });
 
 app.get('/databases/:name/:table/:page?', async (req, res) => {
-    await connect(req.params.name);
-    const { data, error } = await getRows(req.params.table);
-    res.status(error ? 500 : 200).send(data);
+    try {
+        await connect(req.params.name);
+        const data = await getRows(req.params.table);
+        res.status(200).send(data);
+    } catch (e) {
+        res.sendStatus(500);
+    }
 });
 
 app.get('/databases/:name', async (req, res) => {
-    connect(req.params.name);
-    const { data, error } = await getDatabase();
-    res.status(error ? 500 : 200).send(data);
+    try {
+        await connect(req.params.name);
+        const data = await getDatabase();
+        res.status(200).send(data);
+    } catch (e) {
+        res.sendStatus(500);
+    }
 });
 
 app.use(express.static('build'));

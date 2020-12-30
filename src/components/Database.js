@@ -1,13 +1,13 @@
-import { Table, TableHead, TableHeader, TableBody, TableRow, TableCell } from './table';
 import { Container, PrimaryTitle, Row, Col } from './styled-components';
 import React, { useState, useEffect, useContext } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
-import { mdiDatabase, mdiLoading } from '@mdi/js';
 import { ConnectionsContext } from './contexts';
 import { createUseStyles } from 'react-jss';
+import { mdiDatabase } from '@mdi/js';
 import Loading from './misc/Loading';
 import classnames from 'classnames';
 import { Http } from '../classes';
+import { Table } from './table';
 import Icon from '@mdi/react';
 
 export default function Database() {
@@ -72,27 +72,29 @@ export default function Database() {
     }, [name]);
 
     useEffect(() => {
-        (async () => {
-            setLoadingRows(true);
-            async function getRows() {
-                const { code, data } = await Http.get(`/databases/${name}/${activeTable}`);
-                setRows(data);
-                if (code < 200 || code >= 300) {
-                    setError('Something went wrong loading the table rows');
-                }
-            }
-            async function getColumns() {
-                const { code, data } = await Http.get(`/databases/${name}/${activeTable}/columns`);
-                setColumns(data);
-                if (code < 200 || code >= 300) {
-                    setError('Something went wrong loading the table columns');
-                }
-            }
-            getColumns();
-            getRows();
-            setLoadingRows(false);
-        })();
-    }, [name, activeTable]);
+        if (tables.length > 0) {
+            (async () => {
+                    setLoadingRows(true);
+                    async function getRows() {
+                        const { code, data } = await Http.get(`/databases/${name}/${activeTable}`);
+                        setRows(data);
+                        if (code < 200 || code >= 300) {
+                            setError('Something went wrong loading the table rows');
+                        }
+                    }
+                    async function getColumns() {
+                        const { code, data } = await Http.get(`/databases/${name}/${activeTable}/columns`);
+                        setColumns(data);
+                        if (code < 200 || code >= 300) {
+                            setError('Something went wrong loading the table columns');
+                        }
+                    }
+                    await getColumns();
+                    await getRows();
+                    setLoadingRows(false);
+            })();
+        }
+    }, [name, activeTable, tables]);
 
     return (
         <Container>
@@ -107,7 +109,7 @@ export default function Database() {
                         <Row className={classnames(classes.rows)}>
                             <Col className={classnames(classes.tableLinks)} as="ul">
                                 {
-                                    tables.map(({ table }) => (
+                                    !error && tables?.map(({ table }) => (
                                         <NavLink
                                             className={classnames(classes.tableLink)}
                                             to={`/database/${name}/${table}`}
