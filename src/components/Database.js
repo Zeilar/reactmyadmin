@@ -61,10 +61,8 @@ export default function Database() {
 
     useEffect(() => {
         (async () => {
-        console.log('go');
             setLoadingDatabase(true);
             const { code, data } = await Http.get(`/databases/${name}`);
-            console.log(code, data);
             setLoadingDatabase(false);
             setTables(data);
             if (code < 200 || code >= 300) {
