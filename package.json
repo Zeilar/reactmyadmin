@@ -28,7 +28,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "serve": "node server/app.js",
+    "serve": "nodemon server/app.js",
     "build:ui": "rm -rf build && cd server && npm run build --prod && cp -r ../build ."
   },
   "eslintConfig": {

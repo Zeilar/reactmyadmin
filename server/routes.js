@@ -16,7 +16,7 @@ app.get('/databases/:name/:table/columns', async (req, res) => {
 app.get('/databases/:name/:table/:page?', async (req, res) => {
     try {
         await connect(req.params.name);
-        const data = await getRows(req.params.table);
+        const data = await getRows(req.params.table, req.params.page);
         res.status(200).send(data);
     } catch (e) {
         res.sendStatus(500);

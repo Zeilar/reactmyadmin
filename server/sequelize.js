@@ -1,60 +1,64 @@
 const { Sequelize } = require('sequelize');
 
 let database;
-async function connect(name = '', user = 'root', password = null, driver = 'mysql', host = 'localhost') {
+async function connect(name = '', user = 'root', password = null, driver = 'mysql', host = 'localhost', error = () => {}) {
     database = new Sequelize(name, user, password, {
         host: host,
         dialect: driver,
     });
     try {
         await database.authenticate();
-        console.log(`Connection to database ${name} has been established successfully.`);
-    } catch (error) {
-        console.error('Unable to connect to the database:', error);
+    } catch (err) {
+        error(err);
     }
 }
 
-async function getTables() {
+async function getTables(error = () => {}) {
     try {
         const response = await database.showAllSchemas() ?? [];
         return response.map(table => table[Object.keys(table)[0]]);
-    } catch (error) {
-        console.error(error);
+    } catch (err) {
+        error(err);
         return [];
     }
 }
 
-async function getColumns(table) {
+async function getColumns(table, error = () => {}) {
     try {
         return await database.getQueryInterface().describeTable(table);
-    } catch (error) {
-        console.error(error);
+    } catch (err) {
+        error(err);
         return [];
     }
 }
 
-async function getRows(table) {
+async function getRows(table = '', page = 1, perPage = 25, error = () => {}) {
+    page = parseInt(page) || 1;
     try {
-        return await database.query(`SELECT * FROM ${table}`, { type: database.QueryTypes.SELECT });
-    } catch (error) {
-        console.error(error);
+        const rows = await database.query(
+            `SELECT * FROM ${table} LIMIT ${perPage} OFFSET ${(page - 1) * perPage}`,
+            { type: database.QueryTypes.SELECT }
+        );
+        return rows.map((row, i) => ({ ...row, _id: i }));
+    } catch (err) {
+        error(err);
         return [];
     }
 }
 
-async function getDatabase() {
+async function getDatabase(error = () => {}) {
     try {
         const tables = await getTables();
         return await Promise.all(
             tables.map(async table => {
-                const columns = await getColumns(table);
                 return {
-                    columns: columns,
+                    columns: await getColumns(table),
                     table: table,
                 };
             }
         ));
-    } catch (error) {
+    } catch (err) {
+        error(err);
         return [];
     }
 }

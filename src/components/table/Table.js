@@ -1,8 +1,9 @@
+import { TableBody, TableHead, TableRow, TableHeader } from './';
 import { createUseStyles } from 'react-jss';
+import React, { useState } from 'react';
 import classnames from 'classnames';
-import React from 'react';
 
-export default function Table({ children, className, ...props }) {
+export default function Table({ className = '', columns = [], rows = [], ...props }) {
     const styles = createUseStyles({
         table: {
             position: 'relative',
@@ -13,7 +14,7 @@ export default function Table({ children, className, ...props }) {
 
     return (
         <table className={classnames(classes.table, className)} {...props}>
-            {children}
+            {rows.map(row => <TableRow data={row.data} actions={row.actions} />)}
         </table>
     );
 }

@@ -59,6 +59,10 @@ export default function Database() {
     const [loadingRows, setLoadingRows] = useState(true);
     const [error, setError] = useState();
 
+    function saveRow(row) {        
+        setRows(p => p.map(element => element._id === row._id ? row : element));
+    }
+
     useEffect(() => {
         (async () => {
             setLoadingDatabase(true);
@@ -76,7 +80,7 @@ export default function Database() {
             (async () => {
                     setLoadingRows(true);
                     async function getRows() {
-                        const { code, data } = await Http.get(`/databases/${name}/${activeTable}`);
+                        const { code, data } = await Http.get(`/databases/${name}/${activeTable}/${page}`);
                         setRows(data);
                         if (code < 200 || code >= 300) {
                             setError('Something went wrong loading the table rows');
@@ -94,7 +98,7 @@ export default function Database() {
                     setLoadingRows(false);
             })();
         }
-    }, [name, activeTable, tables]);
+    }, [name, activeTable, tables, page]);
 
     return (
         <Container>
@@ -109,7 +113,7 @@ export default function Database() {
                         <Row className={classnames(classes.rows)}>
                             <Col className={classnames(classes.tableLinks)} as="ul">
                                 {
-                                    !error && tables?.map(({ table }) => (
+                                    !error && tables.map(({ table }) => (
                                         <NavLink
                                             className={classnames(classes.tableLink)}
                                             to={`/database/${name}/${table}`}
@@ -124,7 +128,11 @@ export default function Database() {
                                 {
                                     loadingRows
                                         ? <Loading className="center" />
-                                        : <Table columns={columns} rows={rows} actions={[]} />
+                                        : <Table columns={columns} rows={
+                                            rows.map(row => ({ data: row, actions: {
+                                                save: saveRow,
+                                            }}))
+                                        } />
                                 }
                             </div>
                         </Row>
