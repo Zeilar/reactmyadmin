@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { createUseStyles } from 'react-jss';
 import classnames from 'classnames';
 
-export default function TableCell({ className = '', data = '', actions = [], ...props }) {
+export default function TableCell({ className = '', id = '', data = '', save, setRow, ...props }) {
     const styles = createUseStyles({
         cell: {
             textOverflow: 'ellipsis',
@@ -20,14 +20,22 @@ export default function TableCell({ className = '', data = '', actions = [], ...
     });
     const classes = styles();
 
-    const [localData, setLocalData] = useState(data);
+    const [localState, setLocalState] = useState(data);
     const [editing, setEditing] = useState(false);
 
-    console.log(data, actions);
+    function onChangeHandler(e) {
+        setLocalState(e.target.value);
+
+        // Find the property whose key matches this cell's id
+        // Merge the new value into that slot of the new object
+        setRow(p => ({ ...p, [Object.keys(p).find(key => key === id)]: e.target.value }));
+    }
 
     return (
         <td className={classnames(classes.cell, className)} {...props}>
-            {localData}
+            {data}
+            <input type="text" value={localState} onChange={onChangeHandler} />
+            <button onClick={save}>save</button>
         </td>
     );
 }

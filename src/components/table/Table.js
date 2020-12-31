@@ -14,7 +14,7 @@ export default function Table({ className = '', columns = [], rows = [], ...prop
 
     return (
         <table className={classnames(classes.table, className)} {...props}>
-            {rows.map(row => <TableRow data={row.data} actions={row.actions} />)}
+            {rows.map(row => <TableRow key={Math.random()} data={row.data} actions={row.actions} />)}
         </table>
     );
 }

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
 import { createUseStyles } from 'react-jss';
+import React, { useState } from 'react';
 import classnames from 'classnames';
 import { TableCell } from './';
 
@@ -14,26 +14,31 @@ export default function TableRow({ className = '', data = [], actions = [], ...p
     });
     const classes = styles();
 
-    console.log(data);
+    const [row, setRow] = useState(data);
 
     function parseCells() {
         const parsed = {};
-        for (const property in data) {
+        for (const property in row) {
             if (property !== '_id') {
-                parsed[property] = data[property];
+                parsed[property] = row[property];
             }
         }
 
         const cells = [];
         for (const property in parsed) {
-            cells.push(parsed[property]);
+            cells.push(<TableCell id={property} key={property} data={parsed[property]} save={save} setRow={setRow} />);
         }
         return cells;
     }
 
+    function save() {
+        actions.save(row);
+        console.log('save', row);
+    }
+
     return (
         <tr className={classnames(classes.row, className)} {...props}>
-            {parseCells().map(cell => <TableCell data={cell} />)}
+            {parseCells()}
         </tr>
     );
 }
